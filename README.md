@@ -30,25 +30,17 @@ This repository contains the consolidated source code for the TuLineShop project
     pip install -r requirements.txt
     ```
 
-## Running the Services
+## Running the Service
 
--   **LINE Bot API & Product API**:
+To run the integrated application (LINE Bot API and Shop View):
 
-    ```bash
-    cd packages/line-bot-api
-    python main.py
-    ```
-
--   **Shop View**:
-
-    ```bash
-    cd packages/shop-view
-    gunicorn app:app
-    ```
+```bash
+gunicorn app:app
+```
 
 ## Packages
 
-The individual projects are located in the `packages` directory:
+The original individual projects are located in the `packages` directory:
 
--   **`packages/line-bot-api`**: The backend API for the LINE bot and product data, originally from the `line-bot-api` project.
--   **`packages/shop-view`**: The frontend web application for the shop, originally from the `shop-view` project.
+-   **`packages/line-bot-api`**: Contains the LINE Bot API and product data logic.
+-   **`packages/shop-view`**: Contains the frontend web application assets (static files and templates).
