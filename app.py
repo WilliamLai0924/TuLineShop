@@ -1,4 +1,6 @@
+import sys
 import os
+sys.path.insert(0, os.path.dirname(__file__))
 import requests
 from flask import (Flask, jsonify, redirect, render_template, request,
                    send_from_directory, url_for, abort)
@@ -16,7 +18,7 @@ from packages.line_bot_api import google_drive
 app = Flask(__name__, static_folder='packages/shop-view/static', template_folder='packages/shop-view/templates')
 
 config = configparser.ConfigParser()
-config.read('packages/line-bot-api/config.ini') # Adjust path to config.ini
+config.read('packages/line_bot_api/config.ini') # Adjust path to config.ini
 TOKEN = os.environ.get('WALLE_TOKEN', None)
 SECRET = os.environ.get('WALLE_SECRET', None)
 

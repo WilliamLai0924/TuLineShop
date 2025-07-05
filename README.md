@@ -42,5 +42,5 @@ gunicorn app:app
 
 The original individual projects are located in the `packages` directory:
 
--   **`packages/line-bot-api`**: Contains the LINE Bot API and product data logic.
+-   **`packages/line_bot_api`**: Contains the LINE Bot API and product data logic.
 -   **`packages/shop-view`**: Contains the frontend web application assets (static files and templates).
