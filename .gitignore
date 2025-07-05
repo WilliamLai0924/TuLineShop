@@ -1,0 +1,12 @@
+# Virtual environment
+venv/
+
+# Configuration files
+**/config.ini
+
+# Credentials
+**/gdrive-client.json
+
+# Python cache
+__pycache__/
+*.pyc
