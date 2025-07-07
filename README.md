@@ -38,9 +38,9 @@ To run the integrated application (LINE Bot API and Shop View):
 gunicorn app:app
 ```
 
-## Packages
+## Modules
 
-The original individual projects are located in the `packages` directory:
+The original individual projects are located in the `modules` directory:
 
--   **`packages/line_bot_api`**: Contains the LINE Bot API and product data logic.
--   **`packages/shop-view`**: Contains the frontend web application assets (static files and templates).
+-   **`modules/line_bot_api`**: Contains the LINE Bot API and product data logic.
+-   **`modules/shop-view`**: Contains the frontend web application assets (static files and templates).

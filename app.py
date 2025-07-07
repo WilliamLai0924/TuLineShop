@@ -12,15 +12,19 @@ from pathlib import Path
 
 import configparser
 import json
-from packages.line_bot_api import message
-from packages.line_bot_api import google_drive
+from modules.line_bot_api import message
+from modules.line_bot_api import google_drive
 
-app = Flask(__name__, static_folder='packages/shop-view/static', template_folder='packages/shop-view/templates')
+app = Flask(__name__, static_folder='modules/shop-view/static', template_folder='modules/shop-view/templates')
 
 config = configparser.ConfigParser()
-config.read('packages/line_bot_api/config.ini') # Adjust path to config.ini
+config.read('modules/line_bot_api/config.ini') # Adjust path to config.ini
 TOKEN = os.environ.get('WALLE_TOKEN', None)
 SECRET = os.environ.get('WALLE_SECRET', None)
+FID = os.environ.get('FiD', None)
+
+if FID is None:
+    FID = config['googledirve']['fid']
 
 if TOKEN is None:
     TOKEN = config['linebot']['token']
@@ -34,7 +38,8 @@ whhandler = WebhookHandler(SECRET)
 def index():
    print('Request for index page received')
    try:
-       products = google_drive.query_products()
+       gc_service = google_drive.get_drive_service2()
+       products = google_drive.fetch_product_data(gc_service, FID)
    except Exception as e:
        print(f"Error fetching products: {e}")
        products = []
@@ -98,7 +103,8 @@ def callback():
 @whhandler.add(MessageEvent,message=TextMessage)
 def handle_message(event):
     if "買" in event.message.text:
-        products = google_drive.query_products()
+        gc_service = google_drive.get_drive_service2()
+        products = google_drive.fetch_product_data(gc_service, FID)
         msg = message.create_product_bubble_msg(products)
         flex = FlexSendMessage(
             alt_text="商品資訊",
