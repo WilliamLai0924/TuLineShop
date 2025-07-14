@@ -63,13 +63,28 @@ def hello():
 
 @app.route('/submit-order', methods=['POST'])
 def submit_order():
-    data = request.form
+    data = request.json # Change from request.form to request.json
     name = data.get('name')
-    product = data.get('product')
-    quantity = data.get('quantity')
+    contact = data.get('contact')
+    pickup_time = data.get('pickup_time')
+    items = data.get('items') # This will be a list of dictionaries
 
-    # 回傳成功訊息
-    return jsonify({"message": f"訂單已送出成功！\n收到訂單：姓名={name}, 商品={product}, 數量={quantity}"})
+    if not all([name, contact, pickup_time, items]):
+        return jsonify({"message": "Missing order information."}, 400)
+
+    try:
+        gc_service = google_drive.get_drive_service2()
+        sheet_service = google_drive.get_sheets_service2()
+        # Assuming get_orderList is used to get the sheet_id for orders
+        order_sheet_id = google_drive.get_orderList(gc_service, FID)
+        if not order_sheet_id:
+            return jsonify({"message": "Order sheet not found."}, 500)
+
+        google_drive.submit_order(sheet_service, name, contact, pickup_time, items, order_sheet_id)
+        return jsonify({"message": "訂單已送出成功！"})
+    except Exception as e:
+        print(f"Error submitting order: {e}")
+        return jsonify({"message": f"下單失敗：{str(e)}"}, 500)
 
 @app.route('/hi',methods=['get'])
 def hi():
@@ -77,12 +92,25 @@ def hi():
 
 @app.route('/products', methods=['GET'])
 def get_products():
-    products = google_drive.query_products()
-    return jsonify(products)
+    gc_service = google_drive.get_drive_service2()
+    products = google_drive.fetch_product_data(gc_service, FID)
+    orderID = google_drive.get_orderList(gc_service, FID)
+    return jsonify({'orderID': orderID, 'products': products})
+
+@app.route('/product_list')
+def product_list():
+    return render_template('product_list.html')
 
 @app.route('/api/hello', methods=['GET'])
 def api_hello():
     return jsonify({'message':'Hi~'})
+
+@app.route('/api/prices/<product_name>', methods=['GET'])
+def get_prices(product_name):
+    gc_service = google_drive.get_drive_service2()
+    sheets_service = google_drive.get_sheets_service2()
+    price_list = google_drive.get_price_list(gc_service, sheets_service, FID, product_name)
+    return jsonify(price_list)
 
 @app.route('/callback', methods=['POST'])
 def callback():
@@ -114,7 +142,6 @@ def handle_message(event):
             flex.contents.contents[i].body.contents = [
                 {"type": "text", "text": Path(products[i]['description']).stem, "weight": "bold", "size": "sm", "color": "#888888", "wrap": True},
                 {"type": "text", "text": products[i]['name'], "weight": "bold", "size": "xl"},
-                {"type": "text", "text": products[i]['price'], "color": "#888888", "size": "sm"}
             ]
         line_bot_api.reply_message(event.reply_token, flex)
     if "加入店主" in event.message.text:
