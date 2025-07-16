@@ -151,7 +151,7 @@ def get_sheets_service2():
             client, scopes=SCOPES)
     else:
         client = json.loads(client)
-        client['private_key'] = client['private_key'].replace('\n','\n')
+        client['private_key'] = client['private_key'].replace('\\n','\n')
         creds = service_account.Credentials.from_service_account_info(client, scopes=SCOPES)
     return build('sheets', 'v4', credentials=creds)
 
