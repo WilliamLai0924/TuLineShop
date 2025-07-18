@@ -51,14 +51,23 @@
             color: #7a6a5d;
         }
         .btn-primary {
-            background-color: #d2b48c; /* Tan color for primary button */
-            border-color: #d2b48c;
+            background-color: #eaddcf; /* Softer tan */
+            border-color: #eaddcf;
             color: #5a4a42;
         }
         .btn-primary:hover {
-            background-color: #c1a17d;
-            border-color: #c1a17d;
+            background-color: #d9c8b9; /* Slightly darker for hover */
+            border-color: #d9c8b9;
         }
+        .btn-success {
+            background-color: #deb887; /* Burlywood */
+            border-color: #deb887;
+        }
+        .btn-success:hover {
+            background-color: #d2a679; /* Darker burlywood */
+            border-color: #d2a679;
+        }
+
         #cart-display {
             border: 1px solid #e0d8c7;
             padding: 20px;
@@ -121,18 +130,53 @@
 
     <div class="container mt-5">
         <h1 class="text-center mb-4">商品清單</h1>
+
+        <!-- Mobile Cart (Visible on small screens) -->
+        <div class="d-md-none mb-3">
+            <button class="btn btn-primary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#mobileCart" aria-expanded="false" aria-controls="mobileCart">
+                購物車 (<span class="cart-total">0</span>)
+            </button>
+            <div class="collapse" id="mobileCart">
+                <div class="card card-body">
+                    <div id="cart-display-mobile">
+                        <ul class="list-unstyled cart-items">
+                            <!-- Cart items will be displayed here -->
+                        </ul>
+                        <p><strong>總計: $<span class="cart-total">0</span></strong></p>
+                        <button class="btn btn-success w-100 mt-3 checkout-btn" style="display: none;">下單</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-8">
                 <div id="product-list" class="row"></div>
             </div>
-            <div class="col-md-4">
+            <!-- Desktop Cart (Visible on medium screens and up) -->
+            <div class="d-none d-md-block col-md-4">
                 <h2>購物車</h2>
-                <div id="cart-display">
-                    <ul id="cart-items" class="list-unstyled">
+                <div id="cart-display-desktop">
+                    <ul class="list-unstyled cart-items">
                         <!-- Cart items will be displayed here -->
                     </ul>
-                    <p><strong>總計: $<span id="cart-total">0</span></strong></p>
-                    <button id="checkout-btn" class="btn btn-success w-100 mt-3" style="display: none;">下單</button>
+                    <p><strong>總計: $<span class="cart-total">0</span></strong></p>
+                    <button class="btn btn-success w-100 mt-3 checkout-btn" style="display: none;">下單</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">商品圖片</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="full-image" class="img-fluid">
                 </div>
             </div>
         </div>
@@ -153,13 +197,44 @@
                         </div>
                         <div class="mb-3">
                             <label for="quantity" class="form-label">數量</label>
-                            <input type="number" class="form-control" id="quantity" value="1" min="1">
+                            <select class="form-select" id="quantity">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                                <option value="19">19</option>
+                                <option value="20">20</option>
+                                <option value="21">21</option>
+                                <option value="22">22</option>
+                                <option value="23">23</option>
+                                <option value="24">24</option>
+                                <option value="25">25</option>
+                                <option value="26">26</option>
+                                <option value="27">27</option>
+                                <option value="28">28</option>
+                                <option value="29">29</option>
+                                <option value="30">30</option>
+                            </select>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                     <button type="button" class="btn btn-primary" id="confirm-add-to-cart">確認</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>
@@ -190,8 +265,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-primary" id="confirm-order-btn">確認下單</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                 </div>
             </div>
         </div>
@@ -202,22 +277,24 @@
         document.addEventListener('DOMContentLoaded', function () {
             var priceModal = new bootstrap.Modal(document.getElementById('priceModal'));
             var orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+            var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
             var priceOptionsContainer = document.getElementById('price-options');
             var modalTitle = document.getElementById('priceModalLabel');
             var allProductPrices = {}; // Store all product prices here
             var cartItems = []; // Array to store items in the cart
             var loadingOverlay = document.getElementById('loading-overlay');
-            var checkoutBtn = document.getElementById('checkout-btn');
 
             function updateCartDisplay() {
-                var cartList = document.getElementById('cart-items');
-                var cartTotal = document.getElementById('cart-total');
-                cartList.innerHTML = ''; // Clear current cart display
+                var cartLists = document.querySelectorAll('.cart-items');
+                var cartTotals = document.querySelectorAll('.cart-total');
+                var checkoutBtns = document.querySelectorAll('.checkout-btn');
                 var total = 0;
 
+                cartLists.forEach(list => list.innerHTML = ''); // Clear all cart displays
+
                 if (cartItems.length === 0) {
-                    cartList.innerHTML = '<li class="text-muted">購物車是空的。</li>';
-                    checkoutBtn.style.display = 'none'; // Hide checkout button
+                    cartLists.forEach(list => list.innerHTML = '<li class="text-muted">購物車是空的。</li>');
+                    checkoutBtns.forEach(btn => btn.style.display = 'none');
                 } else {
                     cartItems.forEach(function (item) {
                         var listItem = document.createElement('li');
@@ -225,14 +302,14 @@
                         listItem.innerHTML = `
                             <div><strong>${item.productName}</strong></div>
                             <div>選項: ${item.option}</div>
-                            <div>價格: $${item.price} x ${item.quantity}</div>
+                            <div>價格: ${item.price} x ${item.quantity}</div>
                         `;
-                        cartList.appendChild(listItem);
+                        cartLists.forEach(list => list.appendChild(listItem.cloneNode(true)));
                         total += item.price * item.quantity;
                     });
-                    checkoutBtn.style.display = 'block'; // Show checkout button
+                    checkoutBtns.forEach(btn => btn.style.display = 'block');
                 }
-                cartTotal.textContent = total.toFixed(2);
+                cartTotals.forEach(span => span.textContent = total.toFixed(0));
             }
 
             // Show loading overlay initially
@@ -277,6 +354,16 @@
                     // After all products and prices are fetched, hide loading overlay and attach event listeners
                     Promise.all(pricePromises).then(() => {
                         loadingOverlay.style.display = 'none'; // Hide loading overlay
+
+                        // Attach listener for image click
+                        document.querySelectorAll('.card-img-top').forEach(function(img) {
+                            img.addEventListener('click', function() {
+                                document.getElementById('full-image').src = this.src;
+                                document.getElementById('imageModalLabel').textContent = this.alt;
+                                imageModal.show();
+                            });
+                        });
+
                         document.querySelectorAll('.add-to-cart-btn').forEach(function (button) {
                             button.addEventListener('click', function () {
                                 var productName = this.getAttribute('data-product-name');
@@ -330,8 +417,10 @@
                 }
             });
 
-            checkoutBtn.addEventListener('click', function() {
-                orderModal.show();
+            document.querySelectorAll('.checkout-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    orderModal.show();
+                });
             });
 
             document.getElementById('confirm-order-btn').addEventListener('click', function() {
